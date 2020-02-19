@@ -1,6 +1,6 @@
 Sudocode for this idea
 
-```java
+```c
 void highlight_recovery(TYPE rgb[3])
 {
   // find the indices of the max, median, and min RGB values
@@ -45,6 +45,9 @@ void highlight_recovery(TYPE rgb[3])
   rgb[min_index]    = rgb[max_index] * (1.f - S)
 }
 ```
+
 city_comp.png conf
 neutral: 1.2282886 1 1.6131868
 color matrix: 1.4868945 -0.6438222 -0.0699355 -0.261274 1.0494869 0.1399011 -0.1775877 0.313115 0.4792254
+
+We do all of our calculations in the camera color space and then convert to srgb color space before saving the image.
