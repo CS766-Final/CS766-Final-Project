@@ -4,27 +4,13 @@ import color as clr
 
 
 def hsv(rgb):
-    for y in range(rgb.shape[0]):
-        for x in range(rgb.shape[1]):
-            pixel = rgb[y][x]
+    hsv = clr.rgb2hsv(rgb)
+    hsv_c = clr.rgb2hsv(np.clip(rgb, 0.0, 1.0))
 
-            max_ind = np.argmax(pixel)
-            min_ind = np.argmin(pixel)
-            med_ind = (3 - (max_ind + min_ind)) % 2
+    hsv_r = np.concatenate([x[..., np.newaxis] for x in [
+        hsv_c[:, :, 0], hsv_c[:, :, 1], hsv[:, :, 2]]], axis=-1)
 
-            clip = np.copy(pixel).clip(0.0, 1.0)
-
-            h = 0
-            if pixel[max_ind] != pixel[min_ind]:
-                h = (pixel[med_ind] - pixel[min_ind]) / \
-                    (pixel[max_ind] - pixel[min_ind])
-
-            s = 0
-            if clip[max_ind] != 0:
-                s = 1.0 - (clip[min_ind] / clip[max_ind])
-
-            pixel[med_ind] = pixel[max_ind] * (1.0 - s + s * h)
-            pixel[min_ind] = pixel[max_ind] * (1.0 - s)
+    rgb = clr.hsv2rgb(hsv_r)
 
     return rgb
 
@@ -36,14 +22,20 @@ def lch(cam, cam2srgb):
     srgb[srgb < 0] = 0
 
     lch = clr.rgb2lch(srgb)
-    lch_c = clr.rgb2lch(np.clip(srgb, 0.0, 1.0))
+    lch_c = clr.rgb2lch(np.clip(cam, 0, 1) @ cam2srgb)
+
+    l = lch[:, :, 0]
+    lc = lch_c[:, :, 0]
+    l[l < lc] = lc[l < lc]
 
     lch_r = np.concatenate([x[..., np.newaxis] for x in [
-                           lch[:, :, 0], lch_c[:, :, 1], lch_c[:, :, 2]]], axis=-1)
+        l, lch_c[:, :, 1], lch[:, :, 2]]], axis=-1)
 
     srgb_r = clr.lch2rgb(lch_r)
 
-    cam_r = srgb_r @ np.linalg.inv(cam2srgb)
+    mat = np.linalg.inv(cam2srgb)
+
+    cam_r = srgb_r @ mat
 
     return cam_r
 
@@ -63,11 +55,10 @@ def raw_to_rgb(path, wb_multipliers):
     # read in the image
     # Convert each rgb value to [0,1]
     # 4095/3686 is the DNG whitelevel
-    raw = np.clip(
-        4095 / 3686 * np.divide(imio.imread(path, pilmode="RGB"), 255.0), 0.0, 1.0)
+    raw = np.clip(np.power(np.divide(imio.imread(path, pilmode="RGB"), np.power(2, 8) - 1), 2.2), 0.0, 1.0)
     # Make it brighter
     # This is so we can simulate clipping
-    raw *= 1.33  # 0 EV boost
+    raw *= np.power(2, 0)  # 0 EV boost
     # Ensure no value over 1
     clip = np.clip(raw, 0.0, 1.0)
     # White balance each pixel
@@ -75,17 +66,19 @@ def raw_to_rgb(path, wb_multipliers):
     return wb
 
 
-def write_img(img, path_to_write, cam2srgb, curve='srgb'):
+def write_img(img, path_to_write, cam2srgb, curve='power', hdr=False):
+    # clip to prevent pink highlights in SDR image
+    img = img if hdr else np.clip(img, 0, 1)
+
     # Do the final color conversion
     img = img @ cam2srgb
-
     img[img < 0] = 0
 
     # Gamma correction
     # brings up all the mid range color
     # This is common practice when image is for monitor display
 
-    img *= 4
+    img *= np.power(2, 2.76)
 
     img = log(img) if curve == 'log' else np.power(img, 1. / 2.2)
 
