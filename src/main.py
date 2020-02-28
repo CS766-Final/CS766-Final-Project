@@ -1,43 +1,8 @@
 import imageio as imio
 import numpy as np
-import color as clr
+import hsv
+import lch
 
-
-def hsv(rgb):
-    hsv = clr.rgb2hsv(rgb)
-    hsv_c = clr.rgb2hsv(np.clip(rgb, 0.0, 1.0))
-
-    hsv_r = np.concatenate([x[..., np.newaxis] for x in [
-        hsv_c[:, :, 0], hsv_c[:, :, 1], hsv[:, :, 2]]], axis=-1)
-
-    rgb = clr.hsv2rgb(hsv_r)
-
-    return rgb
-
-
-def lch(cam, cam2srgb):
-    # Do the final color conversion
-    srgb = cam @ cam2srgb
-
-    srgb[srgb < 0] = 0
-
-    lch = clr.rgb2lch(srgb)
-    lch_c = clr.rgb2lch(np.clip(cam, 0, 1) @ cam2srgb)
-
-    l = lch[:, :, 0]
-    lc = lch_c[:, :, 0]
-    l[l < lc] = lc[l < lc]
-
-    lch_r = np.concatenate([x[..., np.newaxis] for x in [
-        l, lch_c[:, :, 1], lch[:, :, 2]]], axis=-1)
-
-    srgb_r = clr.lch2rgb(lch_r)
-
-    mat = np.linalg.inv(cam2srgb)
-
-    cam_r = srgb_r @ mat
-
-    return cam_r
 
 
 def raw_to_rgb(path, wb_multipliers):
@@ -55,7 +20,8 @@ def raw_to_rgb(path, wb_multipliers):
     # read in the image
     # Convert each rgb value to [0,1]
     # 4095/3686 is the DNG whitelevel
-    raw = np.clip(np.power(np.divide(imio.imread(path, pilmode="RGB"), np.power(2, 8) - 1), 2.2), 0.0, 1.0)
+    raw = np.clip(np.power(np.divide(imio.imread(
+        path, pilmode="RGB"), np.power(2, 8) - 1), 2.2), 0.0, 1.0)
     # Make it brighter
     # This is so we can simulate clipping
     raw *= np.power(2, 0)  # 0 EV boost
@@ -140,11 +106,11 @@ if __name__ == "__main__":
     write_img(wb, "./ignore/sdr_log.png", cam2srgb, 'log')
 
     # Do the hsv recovery
-    hsv_hl = hsv(wb)
+    hsv_hl = hsv.hsv(wb)
     # The image after hsv recovery
     write_img(hsv_hl, "./ignore/hsv_hl.png", cam2srgb, 'log')
 
     # Do the hsv recovery
-    lch_hl = lch(wb, cam2srgb)
+    lch_hl = lch.lch(wb, cam2srgb)
     # The image after hsv recovery
     write_img(lch_hl, "./ignore/lch_hl.png", cam2srgb, 'log')
