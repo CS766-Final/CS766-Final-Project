@@ -4,8 +4,7 @@ import hsv
 import lch
 
 
-
-def raw_to_rgb(path, wb_multipliers):
+def raw_to_rgb(path, wb_multipliers, power, gain):
     '''
     Read in the raw image from the path and whitebalance the image
 
@@ -15,16 +14,18 @@ def raw_to_rgb(path, wb_multipliers):
         the path to read from
     wb_multipliers : 3x3 matrix
         the white balance multipliers from the camera
+    power: float
+        Gama
     '''
 
     # read in the image
     # Convert each rgb value to [0,1]
     # 4095/3686 is the DNG whitelevel
     raw = np.clip(np.power(np.divide(imio.imread(
-        path, pilmode="RGB"), np.power(2, 8) - 1), 2.2), 0.0, 1.0)
+        path, pilmode="RGB"), np.power(2, 8) - 1), power), 0.0, 1.0)
     # Make it brighter
     # This is so we can simulate clipping
-    raw *= np.power(2, 0)  # 0 EV boost
+    raw *= np.power(2, gain)  # 0 EV boost
     # Ensure no value over 1
     clip = np.clip(raw, 0.0, 1.0)
     # White balance each pixel
@@ -97,7 +98,8 @@ if __name__ == "__main__":
 
     cam2srgb = get_cam_to_srgb(xyz_to_cam)
 
-    wb = raw_to_rgb("./HSV/city_comp.png", wb_multipliers)
+    wb = raw_to_rgb("./src/city_comp.png", wb_multipliers, 1, .4)
+    wb = raw_to_rgb("./src/chart.png", wb_multipliers, 2.2, 0)
 
     # After whitebalancing, the image is normally just clipped again
     write_img(wb, "./ignore/sdr.png", cam2srgb)
@@ -108,9 +110,9 @@ if __name__ == "__main__":
     # Do the hsv recovery
     hsv_hl = hsv.hsv(wb)
     # The image after hsv recovery
-    write_img(hsv_hl, "./ignore/hsv_hl.png", cam2srgb, 'log')
+    write_img(hsv_hl, "./ignore/hsv_hl.png", cam2srgb, 'log', True)
 
     # Do the hsv recovery
     lch_hl = lch.lch(wb, cam2srgb)
     # The image after hsv recovery
-    write_img(lch_hl, "./ignore/lch_hl.png", cam2srgb, 'log')
+    write_img(lch_hl, "./ignore/lch_hl.png", cam2srgb, 'log', True)

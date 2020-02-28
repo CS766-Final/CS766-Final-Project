@@ -1,6 +1,7 @@
 import color as clr
 import numpy as np
 
+
 def lch(cam, cam2srgb):
     # Do the final color conversion
     srgb = cam @ cam2srgb
