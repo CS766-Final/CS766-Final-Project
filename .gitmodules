@@ -1,0 +1,3 @@
+[submodule "src/cnn/hdrcnn"]
+	path = src/cnn/hdrcnn
+	url = https://github.com/djkong7/hdrcnn.git
