@@ -45,10 +45,10 @@ def write_img(img, path_to_write, cam2srgb, curve='power', hdr=False):
     # brings up all the mid range color
     # This is common practice when image is for monitor display
 
-    img *= np.power(2, 2.76)
+    img *= np.power(2, 0)
 
+    # HLG or power curve.
     img = log(img) if curve == 'log' else np.power(img, 1. / 2.2)
-
     # Save
     imio.imwrite(path_to_write, np.uint8(np.clip(img * 255, 0, 255)))
 
