@@ -1,3 +1,6 @@
 [submodule "src/cnn/hdrcnn"]
 	path = src/cnn/hdrcnn
 	url = https://github.com/djkong7/hdrcnn.git
+[submodule "src/object_detection/detectron2"]
+	path = src/object_detection/detectron2
+	url = https://github.com/djkong7/detectron2.git
