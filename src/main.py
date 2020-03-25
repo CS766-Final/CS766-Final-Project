@@ -93,19 +93,24 @@ if __name__ == "__main__":
     # From the camera
     # Determines the mapping from xyz color space to the camera space
     xyz_to_cam = np.array([[1.28665438, -0.48895655, -0.08305354],
-                           [-0.32054401,  1.10993317,  0.21061084],
-                           [-0.12211477,  0.32127882,  0.76343939]])
+                           [-0.32054401, 1.10993317, 0.21061084],
+                           [-0.12211477, 0.32127882, 0.76343939]])
 
     cam2srgb = get_cam_to_srgb(xyz_to_cam)
 
     wb = raw_to_rgb("./src/city_comp.png", wb_multipliers, 1, .4)
     wb = raw_to_rgb("./src/chart.png", wb_multipliers, 2.2, 0)
 
-    # After whitebalancing, the image is normally just clipped again
-    write_img(wb, "./ignore/sdr.png", cam2srgb)
+    # After white balancing, the image is normally just clipped again
+    write_img(wb, "../ignore/sdr.png", cam2srgb)
 
-    # This is what the image looks like after whitebalancing but not clipped
-    write_img(wb, "./ignore/sdr_log.png", cam2srgb, 'log')
+    # This is what the image looks like after white balancing but not clipped
+    write_img(wb, "../ignore/sdr_log.png", cam2srgb, 'log')
+
+    # Do the lch recovery
+    lch_hl = lch(wb, cam2srgb)
+    # The image after lch recovery
+    write_img(lch_hl, "../ignore/lch_hl.png", cam2srgb, 'log', True)
 
     # Do the hsv recovery
     hsv_hl = hsv.hsv(wb)
