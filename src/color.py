@@ -21,7 +21,6 @@ def _cart2polar_2pi(x, y):
     t += np.where(t < 0., 2 * np.pi, 0)
     return r, t
 
-
 def rgb2lch(rgb):
     arr = rgb @ srgb2xyz
     xyz_ref_white = [0.95047, 1.0, 1.08883]
@@ -45,7 +44,6 @@ def rgb2lch(rgb):
 
     return np.concatenate([x[..., np.newaxis] for x in [L, c, h]], axis=-1)
 
-
 def lch2rgb(lch):
     lab = lch
     c, h = lab[..., 1], lab[..., 2]
@@ -58,8 +56,6 @@ def lch2rgb(lch):
 
     if np.any(z < 0):
         invalid = np.nonzero(z < 0)
-        warn('Color data out of range: Z < 0 in %s pixels' % invalid[0].size,
-             stacklevel=2)
         z[invalid] = 0
 
     xr = np.power(x, 3)
@@ -82,7 +78,6 @@ def lch2rgb(lch):
     rgb = xyz @ xyz2srgb
 
     return rgb
-
 
 def rgb2hsv(rgb):
     hsv = np.empty_like(rgb)
@@ -125,7 +120,6 @@ def rgb2hsv(rgb):
     hsv[np.isnan(hsv)] = 0
 
     return hsv
-
 
 def hsv2rgb(hsv):
     h = hsv[:, :, 0] / 60.

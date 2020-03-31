@@ -11,12 +11,12 @@ def lch(cam, cam2srgb):
     lch = clr.rgb2lch(srgb)
     lch_c = clr.rgb2lch(np.clip(cam, 0, 1) @ cam2srgb)
 
-    l = lch[:, :, 0]
-    lc = lch_c[:, :, 0]
-    l[l < lc] = lc[l < lc]
+    # l = lch[:, :, 0]
+    # lc = lch_c[:, :, 0]
+    # l[l < lc] = lc[l < lc]
 
     lch_r = np.concatenate([x[..., np.newaxis] for x in [
-        l, lch_c[:, :, 1], lch[:, :, 2]]], axis=-1)
+        lch[:, :, 0], lch_c[:, :, 1], lch_c[:, :, 2]]], axis=-1)
 
     srgb_r = clr.lch2rgb(lch_r)
 
