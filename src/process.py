@@ -241,13 +241,13 @@ def arrilog(scene):
 
 def hlg(rgb):
     """
-   Hybrid Log-Gamma encoding
+    Hybrid Log-Gamma encoding
 
-   Parameters
-   ----------
-   lin : ndarray
-       RGB image
-   """
+    Parameters
+    ----------
+    lin : ndarray
+        RGB image
+    """
     rgb *= (12 / np.max(rgb))
     rgb[rgb < 0] = 0
     mask = rgb > 1
@@ -262,5 +262,4 @@ if __name__ == "__main__":
     
     for subdir, dirs, files in os.walk('/media/djkong7/Shared_Storage/Images/bursts'):
         if not len(files) == 0:
-            if subdir == '/media/djkong7/Shared_Storage/Images/bursts/4KK2_20150910_145708_024':
-                p_umap(partial(thread, subdir=subdir), files)
+            p_umap(partial(thread, subdir=subdir), files)
