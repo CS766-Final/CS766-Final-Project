@@ -239,6 +239,23 @@ def arrilog(scene):
     return rgb
 
 
+def hlg(rgb):
+    """
+   Hybrid Log-Gamma encoding
+
+   Parameters
+   ----------
+   lin : ndarray
+       RGB image
+   """
+    rgb *= (12 / np.max(rgb))
+    rgb[rgb < 0] = 0
+    mask = rgb > 1
+    rgb[mask] = 0.17883277 * np.log(rgb[mask] - 0.28466892) + 0.55991073
+    rgb[~mask] = 0.5 * np.sqrt(rgb[~mask])
+    return rgb
+
+
 if __name__ == "__main__":
     # for subdir, dirs, files in os.walk('../ignore/input'):
     #     p_umap(thread, files)
