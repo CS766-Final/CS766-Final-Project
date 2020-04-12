@@ -5,6 +5,7 @@ import os
 from p_tqdm import p_umap
 import hsv
 import lch
+from functools import partial
 
 
 def unpack(raw):
@@ -29,7 +30,7 @@ def unpack(raw):
     rgb = binning(cfa, mask)
 
     # simulate camera ADC gain stage
-    rgb = gain(rgb, 0)
+    rgb = gain(rgb, 1)
 
     # white balance
     rgb = rgb @ wb
@@ -148,7 +149,7 @@ def write_img(img, path, cam2rgb, curve='power', hdr=False):
     imageio.imwrite(path, np.uint8(np.clip(img * 255, 0, 255)))
 
 
-def process(path, name):
+def process(subdir, filename):
     """
     Performs entire camera pipe on image with all highlight recovery methods
     and writes them in respective directories
@@ -159,29 +160,38 @@ def process(path, name):
         filename
     """
 
-    filename = os.path.splitext(name)[0]
+    name = os.path.splitext(filename)[0]
+    (head,folder_name) = os.path.split(subdir)
+    path = subdir+os.sep+filename
 
-    with rawpy.imread(path) as raw:
-        # unpack raw data
-        rgb, cam2rgb = unpack(raw)
+    try:
+        with rawpy.imread(path) as raw:
+            # unpack raw data
+            rgb, cam2rgb = unpack(raw)
 
-        # After white balancing, the image is normally just clipped again
-        write_img(rgb, f'../ignore/output/sdr/{filename}.png', cam2rgb)
+            # After white balancing, the image is normally just clipped again
+            write_img(rgb, f'../ignore/output/sdr/{folder_name}_{name}.png', cam2rgb)
 
-        # This is what the image looks like after white balancing but not clipped
-        write_img(rgb, f'../ignore/output/sdr_log/{filename}.png', cam2rgb, 'log')
+            # This is what the image looks like after white balancing but not clipped
+            write_img(rgb, f'../ignore/output/sdr_log/{folder_name}_{name}.png', cam2rgb, 'log')
 
-        # Write hsv recovery
-        write_img(hsv.hsv(rgb), f'../ignore/output/hsv/{filename}.png', cam2rgb, 'log', True)
+            # Write hsv recovery
+            write_img(hsv.hsv(rgb), f'../ignore/output/hsv/{folder_name}_{name}.png', cam2rgb, 'log', True)
 
-        # Write lch recovery
-        write_img(lch.lch(rgb, cam2rgb), f'../ignore/output/lch/{filename}.png', cam2rgb, 'log', True)
+            # Write lch recovery
+            write_img(lch.lch(rgb, cam2rgb), f'../ignore/output/lch/{folder_name}_{name}.png', cam2rgb, 'log', True)
+    except:
+        print("error converting path:" + path)
+
+def thread(filename, subdir=''):
+    # filepath = '../ignore/input' + os.sep + filename
+    # if filepath.endswith(".dng"):
+    #     process(filepath, filename)
 
 
-def thread(filename):
-    filepath = '../ignore/input' + os.sep + filename
-    if filepath.endswith(".dng"):
-        process(filepath, filename)
+    wanted_filename = "payload_N000.dng"
+    if filename == wanted_filename:
+        process(subdir, filename)
 
 
 def gain(lin, ev):
@@ -230,5 +240,10 @@ def arrilog(scene):
 
 
 if __name__ == "__main__":
-    for subdir, dirs, files in os.walk('../ignore/input'):
-        p_umap(thread, files)
+    # for subdir, dirs, files in os.walk('../ignore/input'):
+    #     p_umap(thread, files)
+    
+    for subdir, dirs, files in os.walk('/media/djkong7/Shared_Storage/Images/bursts'):
+        if not len(files) == 0:
+            if subdir == '/media/djkong7/Shared_Storage/Images/bursts/4KK2_20150910_145708_024':
+                p_umap(partial(thread, subdir=subdir), files)
