@@ -21,6 +21,7 @@ def _cart2polar_2pi(x, y):
     t += np.where(t < 0., 2 * np.pi, 0)
     return r, t
 
+
 def rgb2lch(rgb):
     arr = rgb @ srgb2xyz
     xyz_ref_white = [0.95047, 1.0, 1.08883]
@@ -43,6 +44,7 @@ def rgb2lch(rgb):
     c, h = _cart2polar_2pi(a, b)
 
     return np.concatenate([x[..., np.newaxis] for x in [L, c, h]], axis=-1)
+
 
 def lch2rgb(lch):
     lab = lch
@@ -78,6 +80,7 @@ def lch2rgb(lch):
     rgb = xyz @ xyz2srgb
 
     return rgb
+
 
 def rgb2hsv(rgb):
     hsv = np.empty_like(rgb)
@@ -120,6 +123,7 @@ def rgb2hsv(rgb):
     hsv[np.isnan(hsv)] = 0
 
     return hsv
+
 
 def hsv2rgb(hsv):
     h = hsv[:, :, 0] / 60.

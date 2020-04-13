@@ -243,12 +243,11 @@ def hlg(rgb):
     """
     Hybrid Log-Gamma encoding
 
-    Parameters
-    ----------
-    lin : ndarray
-        RGB image
-    """
-    rgb *= (12 / np.max(rgb))
+   Parameters
+   ----------
+   lin : ndarray
+       RGB image
+   """
     rgb[rgb < 0] = 0
     mask = rgb > 1
     rgb[mask] = 0.17883277 * np.log(rgb[mask] - 0.28466892) + 0.55991073
