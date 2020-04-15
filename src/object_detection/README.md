@@ -1,0 +1,1 @@
+The detectron 2 source is included only for reference. We are using the pre-compiled version available through conda.

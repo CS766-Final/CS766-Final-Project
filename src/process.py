@@ -6,6 +6,7 @@ from p_tqdm import p_umap
 import hsv
 import lch
 from functools import partial
+import errno
 
 
 def unpack(raw):
@@ -30,7 +31,7 @@ def unpack(raw):
     rgb = binning(cfa, mask)
 
     # simulate camera ADC gain stage
-    rgb = gain(rgb, 1)
+    rgb = gain(rgb, 2)
 
     # white balance
     rgb = rgb @ wb
@@ -144,12 +145,12 @@ def write_img(img, path, cam2rgb, curve='power', hdr=False):
     img *= np.power(2, 0)
 
     # HLG or power curve.
-    img = arrilog(img) if curve == 'log' else np.power(img, 1. / 2.2)
+    img = hlg(img) if curve == 'log' else np.power(img, 1. / 2.2)
     # Save
     imageio.imwrite(path, np.uint8(np.clip(img * 255, 0, 255)))
 
 
-def process(subdir, filename):
+def process(subdir_path):
     """
     Performs entire camera pipe on image with all highlight recovery methods
     and writes them in respective directories
@@ -160,9 +161,13 @@ def process(subdir, filename):
         filename
     """
 
-    name = os.path.splitext(filename)[0]
-    (head,folder_name) = os.path.split(subdir)
-    path = subdir+os.sep+filename
+    # We are using the first image from each burst
+    # and they all have the same name
+    filename = 'payload_N000.dng'
+    # Get the name of the subdir from the path
+    (head,folder_name) = os.path.split(subdir_path)
+    # Create path to image
+    path = subdir_path+os.sep+filename
 
     try:
         with rawpy.imread(path) as raw:
@@ -170,28 +175,18 @@ def process(subdir, filename):
             rgb, cam2rgb = unpack(raw)
 
             # After white balancing, the image is normally just clipped again
-            write_img(rgb, f'../ignore/output/sdr/{folder_name}_{name}.png', cam2rgb)
+            write_img(rgb, f'../ignore/output/sdr/{folder_name}.png', cam2rgb)
 
             # This is what the image looks like after white balancing but not clipped
-            write_img(rgb, f'../ignore/output/sdr_log/{folder_name}_{name}.png', cam2rgb, 'log')
+            write_img(rgb, f'../ignore/output/sdr_log/{folder_name}.png', cam2rgb, 'log')
 
             # Write hsv recovery
-            write_img(hsv.hsv(rgb), f'../ignore/output/hsv/{folder_name}_{name}.png', cam2rgb, 'log', True)
+            write_img(hsv.hsv(rgb), f'../ignore/output/hsv/{folder_name}.png', cam2rgb, 'log', True)
 
             # Write lch recovery
-            write_img(lch.lch(rgb, cam2rgb), f'../ignore/output/lch/{folder_name}_{name}.png', cam2rgb, 'log', True)
+            write_img(lch.lch(rgb, cam2rgb), f'../ignore/output/lch/{folder_name}.png', cam2rgb, 'log', True)
     except:
-        print("error converting path:" + path)
-
-def thread(filename, subdir=''):
-    # filepath = '../ignore/input' + os.sep + filename
-    # if filepath.endswith(".dng"):
-    #     process(filepath, filename)
-
-
-    wanted_filename = "payload_N000.dng"
-    if filename == wanted_filename:
-        process(subdir, filename)
+        print("error converting file:" + path)
 
 
 def gain(lin, ev):
@@ -248,7 +243,7 @@ def hlg(rgb):
     lin : ndarray
         RGB image
     """
-    rgb *= (12 / np.max(rgb))
+    #rgb *= (12 / np.max(rgb))
     rgb[rgb < 0] = 0
     mask = rgb > 1
     rgb[mask] = 0.17883277 * np.log(rgb[mask] - 0.28466892) + 0.55991073
@@ -257,9 +252,20 @@ def hlg(rgb):
 
 
 if __name__ == "__main__":
-    # for subdir, dirs, files in os.walk('../ignore/input'):
-    #     p_umap(thread, files)
-    
-    for subdir, dirs, files in os.walk('/media/djkong7/Shared_Storage/Images/bursts'):
-        if not len(files) == 0:
-            p_umap(partial(thread, subdir=subdir), files)
+    # Make the output dirs if they don't exist
+    out_dirs = ['sdr','sdr_log','hsv','lch']
+
+    for out_dir in out_dirs:
+        try:
+            os.makedirs(f'../ignore/output/{out_dir}')
+        except OSError as e:
+            if e.errno != errno.EEXIST:
+                raise
+
+
+    # Path to top level dir containing dataset folders
+    path = '/media/djkong7/Shared_Storage/full'
+    # Get a list of full paths to each of the subdirs
+    sub_dirs = [f.path for f in os.scandir(path) if f.is_dir()]
+    # Process each subdir
+    p_umap(process, sub_dirs)
