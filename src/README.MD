@@ -51,3 +51,18 @@ neutral: 1.2282886 1 1.6131868
 color matrix: 1.4868945 -0.6438222 -0.0699355 -0.261274 1.0494869 0.1399011 -0.1775877 0.313115 0.4792254
 
 We do all of our calculations in the camera color space and then convert to srgb color space before saving the image.
+
+
+
+
+# raw image sizes. png's are half this
+{
+    (4032, 3024): 1055,
+    (4208, 3120): 1432, 
+    (4080, 3028): 85, 
+    (4048, 3036): 660, 
+    (3280, 2464): 245, 
+    (4048, 3044): 136, 
+    (3264, 2448): 26, 
+    (5312, 2988): 1
+}

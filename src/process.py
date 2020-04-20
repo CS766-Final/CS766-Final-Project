@@ -9,7 +9,7 @@ from functools import partial
 import errno
 
 
-def unpack(raw):
+def unpack(raw, gain_stops):
     """
     Unpack raw data to white-balanced RGB image and relevant color metadata to
     transform camera RGB to sRGB
@@ -31,7 +31,7 @@ def unpack(raw):
     rgb = binning(cfa, mask)
 
     # simulate camera ADC gain stage
-    rgb = gain(rgb, 2)
+    rgb = gain(rgb, gain_stops)
 
     # white balance
     rgb = rgb @ wb
@@ -127,27 +127,27 @@ def binning(img, mask):
     return rgb
 
 
-def write_img(img, path, cam2rgb, curve='power', hdr=False):
+def write_img(img, path, cam2rgb, curve='power', hdr=False, overwrite=False):
     """
 
     """
-    # clip to prevent pink highlights in SDR image
-    img = img if hdr else np.clip(img, 0, 1)
+    if (not os.path.exists(path)) or overwrite:
+        # clip to prevent pink highlights in SDR image
+        img = img if hdr else np.clip(img, 0, 1)
 
-    # Do the final color conversion
-    img = img @ cam2rgb.T
-    img[img < 0] = 0
+        # Do the final color conversion
+        img = img @ cam2rgb.T
+        img[img < 0] = 0
 
-    # Gamma correction
-    # brings up all the mid range color
-    # This is common practice when image is for monitor display
+        # Gamma correction
+        # brings up all the mid range color
+        # This is common practice when image is for monitor display
+        img *= np.power(2, 0)
 
-    img *= np.power(2, 0)
-
-    # HLG or power curve.
-    img = hlg(img) if curve == 'log' else np.power(img, 1. / 2.2)
-    # Save
-    imageio.imwrite(path, np.uint8(np.clip(img * 255, 0, 255)))
+        # HLG or power curve.
+        img = hlg(img) if curve == 'log' else np.power(img, 1. / 2.2)
+        # Save
+        imageio.imwrite(path, np.uint8(np.clip(img * 255, 0, 255)))
 
 
 def process(subdir_path):
@@ -157,36 +157,34 @@ def process(subdir_path):
 
     Parameters
     ----------
-    name : str
-        filename
+    name : subdir_path
+        path the the directory the raw file is in
     """
+    
+    # Create path to the raw image
+    # We are using the first image from each burst and they all have the same name
+    raw_file = subdir_path+os.sep+'payload_N000.dng'
 
-    # We are using the first image from each burst
-    # and they all have the same name
-    filename = 'payload_N000.dng'
-    # Get the name of the subdir from the path
-    (head,folder_name) = os.path.split(subdir_path)
-    # Create path to image
-    path = subdir_path+os.sep+filename
 
+    gain_stops = 1
     try:
-        with rawpy.imread(path) as raw:
+        with rawpy.imread(raw_file) as raw:
             # unpack raw data
-            rgb, cam2rgb = unpack(raw)
+            rgb, cam2rgb = unpack(raw, gain_stops)
 
             # After white balancing, the image is normally just clipped again
-            write_img(rgb, f'../ignore/output/sdr/{folder_name}.png', cam2rgb)
+            write_img(rgb, f'{subdir_path}/sdr_{gain_stops}.png', cam2rgb)
 
             # This is what the image looks like after white balancing but not clipped
-            write_img(rgb, f'../ignore/output/sdr_log/{folder_name}.png', cam2rgb, 'log')
+            write_img(rgb, f'{subdir_path}/sdr_log_{gain_stops}.png', cam2rgb, 'log')
 
             # Write hsv recovery
-            write_img(hsv.hsv(rgb), f'../ignore/output/hsv/{folder_name}.png', cam2rgb, 'log', True)
+            write_img(hsv.hsv(rgb), f'{subdir_path}/hsv_{gain_stops}.png', cam2rgb, 'log', True)
 
             # Write lch recovery
-            write_img(lch.lch(rgb, cam2rgb), f'../ignore/output/lch/{folder_name}.png', cam2rgb, 'log', True)
+            write_img(lch.lch(rgb, cam2rgb), f'{subdir_path}/lch_{gain_stops}.png', cam2rgb, 'log', True)
     except:
-        print("error converting file:" + path)
+        print("error converting file:" + raw_file)
 
 
 def gain(lin, ev):
@@ -219,13 +217,13 @@ def encode(lin):
 
 def arrilog(scene):
     """
-   ARRI Log-C 800EI log encoding
+    ARRI Log-C 800EI log encoding
 
-   Parameters
-   ----------
-   lin : ndarray
-       RGB image
-   """
+    Parameters
+    ----------
+    lin : ndarray
+        RGB image
+    """
     rgb = scene.copy()
     rgb[rgb < 0] = 0
     mask = rgb > 0.010591
@@ -264,7 +262,7 @@ if __name__ == "__main__":
 
 
     # Path to top level dir containing dataset folders
-    path = '/media/djkong7/Shared_Storage/full'
+    path = '/media/djkong7/dataset/'
     # Get a list of full paths to each of the subdirs
     sub_dirs = [f.path for f in os.scandir(path) if f.is_dir()]
     # Process each subdir
