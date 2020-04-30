@@ -1,6 +1,7 @@
-# Webpage This is a test.
+# Webpage This is a test
 
-# Project Artifacts
-[Initial Proposal](proposal.md)
+## Project Artifacts
 
+   [Initial Proposal](proposal.md)
 
+   [Midterm Report](midterm_report.md)

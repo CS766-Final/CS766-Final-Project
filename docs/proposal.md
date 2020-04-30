@@ -20,19 +20,19 @@ For many modern image processing methods, visual defects are detected using the 
 
 ### References
 
-[1] https://patents.google.com/patent/US3971065A/en
+[1] <https://patents.google.com/patent/US3971065A/en>
 
-[2] https://static.googleusercontent.com/media/hdrplusdata.org/en//hdrplus.pdf
+[2] <https://static.googleusercontent.com/media/hdrplusdata.org/en//hdrplus.pdf>
 
 [3][https://dl-acm-org.ezproxy.library.wisc.edu/doi/pdf/10.1145/3355089.3356508](https://dl-acm-org.ezproxy.library.wisc.edu/doi/pdf/10.1145/3355089.3356508?download=true)
 
-[4] http://hdrv.org/hdrcnn/material/sga17_paper_large.pdf
+[4] <http://hdrv.org/hdrcnn/material/sga17_paper_large.pdf>
 
-[5] https://www.ece.ucsb.edu/~psen/PaperPages/HDRVideo/
+[5] <https://www.ece.ucsb.edu/~psen/PaperPages/HDRVideo/>
 
-[6] http://faculty.cs.tamu.edu/nimak/Data/Eurographics19_HDRVideo.pdf
+[6] <http://faculty.cs.tamu.edu/nimak/Data/Eurographics19_HDRVideo.pdf>
 
-### **Preliminary Project Timeline**
+### Preliminary Project Timeline
 
 **February 14th:** Project Proposal Due
 
