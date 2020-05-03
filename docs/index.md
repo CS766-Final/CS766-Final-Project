@@ -14,7 +14,7 @@ We narrowed the scope of our investigation to the reconstruction of a high dynam
 
 ### Pixel-wise Separation of Lightness and Color Properties
 
-The pixel-wise methods used are based on the ability to separate lightness information from the colorfulness and hue information that makes up a color. The methods rely on CIE LCh [1] and HSV [2] as the reconstruction color spaces, respectively. Though minor implementation details differ – RGB to LCh conversion requires multiple color transforms – the methods follow the same general algorithm. We copy an unclipped, white-balanced image in camera RGB space and clip it at the defined min and max values for the scale. A conversion to the reconstruction space is applied to both copies of the image. In the reconstruction space we stack the lightness channel (L in LCh, V in HSV) of the unclipped representation with the linearly interpolated color channels of the clipped and unclipped representation. We then apply the reverse transform from the reconstruction space to RGB space. These pixel-wise reconstructions follow white balance in the camera pipe, but precede any digital gain stage and final display RGB space conversions (sRGB, BT.709, etc).
+The pixel-wise methods used are based on the ability to separate lightness information from the colorfulness and hue information that makes up a color. The methods rely on CIE LCh [[1]][Ref 1] and HSV [[2]][Ref 2] as the reconstruction color spaces, respectively. Though minor implementation details differ – RGB to LCh conversion requires multiple color transforms – the methods follow the same general algorithm. We copy an unclipped, white-balanced image in camera RGB space and clip it at the defined min and max values for the scale. A conversion to the reconstruction space is applied to both copies of the image. In the reconstruction space we stack the lightness channel (L in LCh, V in HSV) of the unclipped representation with the linearly interpolated color channels of the clipped and unclipped representation. We then apply the reverse transform from the reconstruction space to RGB space. These pixel-wise reconstructions follow white balance in the camera pipe, but precede any digital gain stage and final display RGB space conversions (sRGB, BT.709, etc).
 
 In the HSV method, one implementation that was found in the open-source community in the app dcraw, used linear interpolation of clipped values and unclipped values to create the reconstruction. In our method, we did no linear interpolation as to recover the full lightness information given by the sensor. Due to the nature of HSV channels not being perceptually linear and being relative values, lightness changes with hue, as does saturation. We also found that using the clipped saturation instead of linearly interpolating between the two representations eliminated harsh artifacting at channel clipping boundaries. 
 
@@ -26,13 +26,13 @@ The LCh method is an absolute transform when specified with a white point. In ou
 
 ### Deep Convolutional Neural Network
 
-The work done by Eilertsen et al. involves using a "fully convolutional deep hybrid dynamic range autoencoder network". The encoder converts SDR input to a latent set and the log transform skip connections help the decoder to reconstruct the HDR image in log domain. The skip connections help to restore lightness information as the fine detail is lost through the down-sampling at each step of the encoder. This network was trained on rasterized, display space images that are output from the camera raw pipeline. This is in opposition to the pixel-wise methods which operate on camera RGB space images before any useful data can be clipped after white-balance and sRGB transform.
+The work done by Eilertsen et al. [[3]][Ref 3] involves using a "fully convolutional deep hybrid dynamic range autoencoder network". The encoder converts SDR input to a latent set and the log transform skip connections help the decoder to reconstruct the HDR image in log domain. The skip connections help to restore lightness information as the fine detail is lost through the down-sampling at each step of the encoder. This network was trained on rasterized, display space images that are output from the camera raw pipeline. This is in opposition to the pixel-wise methods which operate on camera RGB space images before any useful data can be clipped after white-balance and sRGB transform.
 
 **TODO: PUT CNN RECONSTRUCTION**
 
 ## Performance and Evaluation
 
-The dataset used is a subset of the the “HDR+ Burst Photography Dataset” [5][6] compiled and created by a Google Research team. We chose this dataset in part for the number of images, but mostly because the images are largely unmodified raw data and carry color transform metadata needed for our pipeline. Most of the images are around 12MP at a 4:3 ratio. We used the first image from each burst set which contained an average of 6 frames per burst.
+The dataset used is a subset of the the “HDR+ Burst Photography Dataset” [[4]][Ref 4][[5]][Ref 5] compiled and created by a Google Research team. We chose this dataset in part for the number of images, but mostly because the images are largely unmodified raw data and carry color transform metadata needed for our pipeline. Most of the images are around 12MP at a 4:3 ratio. We used the first image from each burst set which contained an average of 6 frames per burst.
 
 The pixel-wise methods are the more compute efficient algorithms, as expected. **might need to change this to Dan's numbers** On a 2.9GHz 6th Gen Intel i7 MacBook Pro using SIMD instructions, the full pipeline from 4:3 ratio, 4K clipped raw binned to 1K reconstructed log space took roughly 4 ms per image. This translates to about 250 fps. Due to the nature of the Halide language, there is no way to perform branch statements without pre-computing possible outcomes. Therefore, both LCh and HSV reconstructions are performed and the correct representation is chosen based on used input. This unified pipeline run on the whole dataset of 3640 DNGs ran at 19.4287 sec, or roughly 187 fps. The same unified pipeline modified for a 2K output resolution averaged roughly 61 fps.
 
@@ -50,7 +50,7 @@ LCh recovery depends less on the raw RGB intensities and their corresponding mul
 
 Something to note with the pixel-wise methods, is that they can only reconstruct hue and saturation values when just one channel in the raw image is clipped. Once two channels clip, these methods only recover lightness. This results in gray regions between the hue restored pixels and full lightness pixels. The CNN and classical methods that take regions into account will fare much better in this regard, except in their failure cases where the result is non-deterministic.
 
-Bounding the usable recovery range of the CNN is more difficult as we don't know the function used for the recovery. We do know, however, that the failure cases for the network result in unusable images entirely. In cases where large portions of the frame are clipped, tearing can occur. Whereas in the worst case of the pixel-wise methods, we will have patches of gray, but still discernable transitions. Despite these cases, HDRCNN shows great ability to recover hue and detail across reasonably sized clipped regions. 
+Bounding the usable recovery range of the CNN is more difficult as we don't know the function used for the recovery. We do know, however, that the failure cases for the network result in unusable images entirely. In cases where large portions of the frame are clipped, tearing can occur. Whereas in the worst case of the pixel-wise methods, we will have patches of gray, but still discernable transitions. Despite these cases, HDRCNN shows great ability to recover hue and detail across reasonably sized clipped regions.
 
 **TODO: SHOW CNN IMAGE TEARING AND GOOD RECOVERY**
 
@@ -59,6 +59,15 @@ Bounding the usable recovery range of the CNN is more difficult as we don't know
 ## Conclusions
 
 ## References
+
+[1] Cyril, “Recovering Highlights with dcraw using LCH blending,” _Blown-highlight recovery with dcraw in LCH coordinates_, 14-Apr-2007. [Online]. Available: <http://people.zoy.org/~cyril/dcraw_lchblend/highlight_recovery_dcraw_lch_patch.html.>
+
+[2]  U. Fuchs and N. K. B. Jensen, “UFRaw,” _UFRaw_. 17-Jun-2015. <http://ufraw.sourceforge.net/Guide.html>
+
+[3] G. Eilertsen, J. Kronander, G. Denes, R. K. Mantiuk, and J. Unger, “HDR image reconstruction from a single exposure using deep CNNs,” _ACM Transactions on Graphics,_ vol. 36, no. 6, pp. 1–15, 2017.
+
+[4][5] S. W. Hasinoff, D. Sharlet, R. Geiss, A. Adams, J. T. Barron, F. Kainz, J. Chen, and M. Levoy, “Burst photography for high dynamic range and low-light imaging on mobile cameras,” _ACM Transactions on Graphics,_ vol. 35, no. 6, pp. 1–12, Nov. 2016.
+<https://dl.acm.org/doi/10.1145/2980179.2980254>
 
 ## Gallery
 
@@ -70,6 +79,19 @@ Bounding the usable recovery range of the CNN is more difficult as we don't know
 
 ## Project Artifacts
 
+* [GitHub Repo](https://github.com/CS766-Final/CS766-Final-Project)
+
 * [Initial Proposal](proposal.md)
 
 * [Midterm Report](midterm_report.md)
+
+[comment]: # (These are the reference style links to references.)
+[Ref 1]: <http://people.zoy.org/~cyril/dcraw_lchblend/highlight_recovery_dcraw_lch_patch.html>
+
+[Ref 2]: <http://ufraw.sourceforge.net/Guide.html>
+
+[Ref 3]: https://dl.acm.org/doi/10.1145/3130800.3130816
+
+[Ref 4]: <http://hdrplusdata.org/dataset.html>
+
+[Ref 5]: <https://static.googleusercontent.com/media/hdrplusdata.org/en//hdrplus.pdf>
