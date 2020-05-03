@@ -24,7 +24,7 @@ The pixel-wise methods used are based on the ability to separate lightness infor
 
 [comment]: # (HTML to get an image to display for webpage.)
 
-<img src = "https://github.com/CS766-Final/CS766-Final-Project/blob/master/docs/pictures/midterm_report_collage.png" alt = "Comparison of reconstructions and encodings of the same image.">
+<img src = "https://github.com/CS766-Final/CS766-Final-Project/blob/master/docs/pictures/midterm_report_collage.png">
 
 Initial impressions are that HSV reconstruction performs best for visual quality and computational efficiency. The method uses the maximum of R, G, and B to construct the lightness while LCh works from a linear combination of the three to construct the lightness values. This along with the cube root encoding in the LCh transform can explain the softer roll-off and reduced lightness values when compared to HSV. This higher contrast in HSV leads us to the hypothesis that it will perform better with object detection since it is better suited to reconstruct distinct edges.
 
