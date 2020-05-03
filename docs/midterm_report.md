@@ -22,9 +22,9 @@ To process the images, we work directly from camera raw images in the Adobe DNG 
 
 The pixel-wise methods used are based on the ability to separate lightness information from the colorfulness and hue information that makes up a color. The methods rely on the CIE LCh [[1]][Ref 1] and HSV [[2]][Ref 2] as the reconstruction color spaces, respectively. Though minor implementation details differ – RGB to LCh conversion requires multiple color transforms – the methods follow the same general algorithm. We copy an unclipped, white-balanced image in camera RGB space and clip it at the defined min and max values for the scale. A conversion to the reconstruction space is applied to both copies of the image. In the reconstruction space we stack the lightness channel (L in LCh, V in HSV) of the unclipped representation with the color channels of the clipped representation. We then apply the reverse transform from the reconstruction space to RGB space. These pixel-wise reconstructions follow white balance in the camera pipe, but precede any digital gain staging and final display RGB space conversions (sRGB, BT.709, etc).
 
-![Comparison of reconstructions and encodings of the same image](/pictures/midterm_report_collage.png)
+[comment]: # (HTML to get an image to display for webpage.)
 
-<img src = "https://github.com/CS766-Final/CS766-Final-Project/blob/master/docs/pictures/midterm_report_collage.png">
+<img src = "https://github.com/CS766-Final/CS766-Final-Project/blob/master/docs/pictures/midterm_report_collage.png" alt = "Comparison of reconstructions and encodings of the same image.">
 
 Initial impressions are that HSV reconstruction performs best for visual quality and computational efficiency. The method uses the maximum of R, G, and B to construct the lightness while LCh works from a linear combination of the three to construct the lightness values. This along with the cube root encoding in the LCh transform can explain the softer roll-off and reduced lightness values when compared to HSV. This higher contrast in HSV leads us to the hypothesis that it will perform better with object detection since it is better suited to reconstruct distinct edges.
 
