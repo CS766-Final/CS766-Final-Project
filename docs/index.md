@@ -38,7 +38,7 @@ The work done by Eilertsen et al. [[3]][Ref 3] involves using a "fully convoluti
 
 The dataset used is a subset of the “HDR+ Burst Photography Dataset” [[4]][Ref 4][[5]][Ref 5] compiled and created by a Google Research team. We chose this dataset in part for the number of images, but mostly because the images are largely unmodified raw data and carry color transform metadata needed for our pipeline. Most of the images are around 12MP at a 4:3 ratio. We used the first image from each burst set which contained an average of 6 frames per burst.
 
-The pixel-wise methods are the more compute efficient algorithms, as expected. **might need to change this to Dan's numbers** On a 2.9GHz 6th Gen Intel i7 MacBook Pro using SIMD instructions, the full pipeline from 4:3 ratio, 4K clipped raw binned to 1K reconstructed log space took roughly 4 ms per image. This translates to about 250 fps. Due to the nature of the Halide language, there is no way to perform branch statements without pre-computing possible outcomes. Therefore, both LCh and HSV reconstructions are performed and the correct representation is chosen based on user input. This unified pipeline run on the whole dataset of 3640 DNGs ran at 19.4287 sec or roughly 187 fps. The same unified pipeline modified for a 2K output resolution averaged roughly 61 fps.
+The pixel-wise methods are the more computational efficient algorithms, as expected. **might need to change this to Dan's numbers** On a 2.9GHz 6th Gen Intel i7 MacBook Pro using SIMD instructions, the full pipeline from 4:3 ratio, 4K clipped raw binned to 1K reconstructed log space took roughly 4 ms per image. This translates to about 250 fps. Due to the nature of the Halide language, there is no way to perform branch statements without pre-computing possible outcomes. Therefore, both LCh and HSV reconstructions are performed and the correct representation is chosen based on user input. This unified pipeline run on the whole dataset of 3640 DNGs ran at 19.4287 sec or roughly 187 fps. The same unified pipeline modified for a 2K output resolution averaged roughly 61 fps.
 
 We did not modify the CNN or create an optimized implementation as the reference implementation is written to use CUDA instructions via Tensorflow. The HDRCNN took roughly **insert ms per image**, translating to roughly **insert fps here** on **insert resolution here** images. This is markedly slower than pixel-wise methods. However, the drop in performance might be reconciled in the evaluation of the final recovery.
 
@@ -92,7 +92,9 @@ Bounding the usable recovery range of the CNN is more difficult as we don't know
 
 ## Project Artifacts
 
-* [GitHub Repo](https://github.com/CS766-Final/CS766-Final-Project)
+* [Main GitHub Repo](https://github.com/CS766-Final/CS766-Final-Project)
+
+* [Test Program for Various Highlight Reconstruction Methods Repo](https://github.com/eddieab/hl_rec)
 
 * [Initial Proposal](proposal.md)
 
