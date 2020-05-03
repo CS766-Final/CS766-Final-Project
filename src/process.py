@@ -118,16 +118,16 @@ def binning(img, mask):
              s[1], r.shape[1] // s[1])
 
     # do final bin step
-    r.reshape(shape).mean(-1).mean(1)
-    g.reshape(shape).mean(-1).mean(1)
-    b.reshape(shape).mean(-1).mean(1)
+    r = r.reshape(shape).mean(-1).mean(1)
+    g = g.reshape(shape).mean(-1).mean(1)
+    b = b.reshape(shape).mean(-1).mean(1)
 
     # stack depth-wise to create RGB matrix
     rgb = np.dstack((r, g, b))
     return rgb
 
 
-def write_img(img, path, cam2rgb, curve='power', hdr=False, overwrite=False):
+def write_img(img, path, cam2rgb, curve='power', hdr=False, overwrite=True):
     """
 
     """
@@ -166,7 +166,7 @@ def process(subdir_path):
     raw_file = subdir_path+os.sep+'payload_N000.dng'
 
 
-    gain_stops = 1
+    gain_stops = 2
     try:
         with rawpy.imread(raw_file) as raw:
             # unpack raw data
@@ -175,14 +175,14 @@ def process(subdir_path):
             # After white balancing, the image is normally just clipped again
             write_img(rgb, f'{subdir_path}/sdr_{gain_stops}.png', cam2rgb)
 
-            # This is what the image looks like after white balancing but not clipped
-            write_img(rgb, f'{subdir_path}/sdr_log_{gain_stops}.png', cam2rgb, 'log')
+            # # This is what the image looks like after white balancing but not clipped
+            # write_img(rgb, f'{subdir_path}/sdr_log_{gain_stops}.png', cam2rgb, 'log')
 
-            # Write hsv recovery
-            write_img(hsv.hsv(rgb), f'{subdir_path}/hsv_{gain_stops}.png', cam2rgb, 'log', True)
+            # # Write hsv recovery
+            # write_img(hsv.hsv(rgb), f'{subdir_path}/hsv_{gain_stops}.png', cam2rgb, 'log', True)
 
-            # Write lch recovery
-            write_img(lch.lch(rgb, cam2rgb), f'{subdir_path}/lch_{gain_stops}.png', cam2rgb, 'log', True)
+            # # Write lch recovery
+            # write_img(lch.lch(rgb, cam2rgb), f'{subdir_path}/lch_{gain_stops}.png', cam2rgb, 'log', True)
     except:
         print("error converting file:" + raw_file)
 
