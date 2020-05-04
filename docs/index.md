@@ -94,7 +94,7 @@ To calculate which image had better detection, we started by averaging the detec
 
 ## Conclusions
 
-The downstream applications, such as object detection, see some benefit from the usage of HDR reconstruction. The pixel-wise methods are robust, portable, and efficient. However, because of the failure cases, these methods could be further improved from being combined with inpainting or another region-based method. HDR CNNs are not able to provide a quick enough reconstruction for it to be considered realtime. Although it is worth mentioning that HDR CNNs are still in their infancy and thus new CNNs and training strategies could change this result in the future. 
+The downstream applications, such as object detection, see some benefit from the usage of HDR reconstruction. The pixel-wise methods are robust, portable, and efficient. However, because of the failure cases, these methods could be further improved from being combined with inpainting or another region-based method. HDR CNNs are not able to provide a quick enough reconstruction for it to be considered realtime. Although it is worth mentioning that HDR CNNs are still in their infancy and thus new CNNs and training strategies could change this result in the future.
 
 ## Gallery
 

@@ -117,7 +117,7 @@ if __name__ == "__main__":
 
     for gain in stats:
         for method_name in stats[gain]:
-            stats[gain][method_name] = list(map(lambda x: -1 if x < 0 else 1, stats[gain][method_name]))
-            stats[gain][method_name] = sum(stats[gain][method_name])/len(stats[gain][method_name])
+            stats[gain][method_name] = list(map(lambda x: 0 if x < 0 else 1, stats[gain][method_name]))
+            stats[gain][method_name] = (sum(stats[gain][method_name]),len(stats[gain][method_name]))
 
     print(stats)
