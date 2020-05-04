@@ -12,9 +12,13 @@ We narrowed the scope of our investigation to the reconstruction of a HDR image 
 
 ## Methods
 
+### Processing the Images
+
+To process the images, we work directly from camera raw images in the Adobe DNG format. A crude raw pipeline was implemented using rawpy to extract the mosaiced image and the necessary metadata for color transforms. As the focus of this project is on real-time methods for use in embedded/low-compute systems, we perform 2-stage 2x2 pixel binning as opposed to high detail demosaic. We simulate ADC clipping with an early gain stage in the raw pipeline. This will allow us to determine the level of overexposure at which each method can no longer produce detectable objects with good confidence. Reconstructed images result in values greater than 1.0, meaning we must encode the data such that all values are able to be written to 8-bit files. We encode the SDR image with both a standard 2.2 gamma power curve and Hybrid Log-Gamma. [[1]][Ref 1] The reconstructed images are all encoded with HLG. HLG was chosen because of similarity in characteristic to standard gamma curves while also being able to encode the range 0.0 to 12.0 before clipping. This has been sufficient for our purposes, but it is possible to exhaust the range of this encoding, so other encodings may need to be taken into consideration in other situations.
+
 ### Pixel-wise Separation of Lightness and Color Properties
 
-The pixel-wise methods used are based on the ability to separate lightness information from the colorfulness and hue information that makes up a color. The methods rely on CIE LCh [[1]][Ref 1] and HSV [[2]][Ref 2] as the reconstruction color spaces, respectively. Though minor implementation details differ – RGB to LCh conversion requires multiple color transforms – the methods follow the same general algorithm. We copy an unclipped, white balanced image in camera RGB space and clip it at the defined minimum and maximum values for the scale. A conversion to the reconstruction space is applied to both copies of the image. In the reconstruction space, we stack the lightness channel (L in LCh, V in HSV) of the unclipped representation with the linearly interpolated color channels of the clipped and unclipped representation. We then apply the reverse transform from the reconstruction space to the RGB space. These pixel-wise reconstructions follow white balance in the camera pipe but precede any digital gain stage and final display RGB space conversions (sRGB, BT.709, etc).
+The pixel-wise methods used are based on the ability to separate lightness information from the colorfulness and hue information that makes up a color. The methods rely on CIE LCh [[2]][Ref 2] and HSV [[3]][Ref 3] as the reconstruction color spaces, respectively. Though minor implementation details differ – RGB to LCh conversion requires multiple color transforms – the methods follow the same general algorithm. We copy an unclipped, white balanced image in camera RGB space and clip it at the defined minimum and maximum values for the scale. A conversion to the reconstruction space is applied to both copies of the image. In the reconstruction space, we stack the lightness channel (L in LCh, V in HSV) of the unclipped representation with the linearly interpolated color channels of the clipped and unclipped representation. We then apply the reverse transform from the reconstruction space to the RGB space. These pixel-wise reconstructions follow white balance in the camera pipe but precede any digital gain stage and final display RGB space conversions (sRGB, BT.709, etc).
 
 In the HSV method, one implementation that was found in the open-source community in the app dcraw used linear interpolation of clipped values and unclipped values to create the reconstruction. In our method, we did no linear interpolation to recover the full lightness information given by the sensor. Due to the nature of HSV channels not being perceptually linear and being relative values, lightness changes with hue, as does saturation. We also found that using the clipped saturation instead of linearly interpolating between the two representations eliminated harsh artifacting at channel clipping boundaries and discoloring across the region. 
 
@@ -30,7 +34,7 @@ The LCh method is an absolute transform when specified with a white point. In ou
 
 ### Deep Convolutional Neural Network
 
-The work done by Eilertsen et al. [[3]][Ref 3] involves using a "fully convolutional deep hybrid dynamic range autoencoder network". The encoder converts SDR input to a latent set and the log transform skip connections help the decoder to reconstruct the HDR image in the log domain. The skip connections help to restore lightness information as the fine detail is lost through the down-sampling at each step of the encoder. This network was trained on rasterized, display space images that are output from the camera raw pipeline. This is in opposition to the pixel-wise methods which operate on camera RGB space images before any useful data can be clipped after white balance and sRGB transform.
+The work done by Eilertsen et al. [[4]][Ref 4] involves using a "fully convolutional deep hybrid dynamic range autoencoder network". The encoder converts SDR input to a latent set and the log transform skip connections help the decoder to reconstruct the HDR image in the log domain. The skip connections help to restore lightness information as the fine detail is lost through the down-sampling at each step of the encoder. This network was trained on rasterized, display space images that are output from the camera raw pipeline. This is in opposition to the pixel-wise methods which operate on camera RGB space images before any useful data can be clipped after white balance and sRGB transform.
 
 | <img style="transform:rotate(180deg);" src="./pictures/62CL_20150215_180549_095/cnn_+2ev.png"> |
 | :----------------------------------------------------------: |
@@ -40,7 +44,7 @@ The work done by Eilertsen et al. [[3]][Ref 3] involves using a "fully convoluti
 
 ## Performance and Evaluation
 
-The dataset used is a subset of the “HDR+ Burst Photography Dataset” [[4]][Ref 4][[5]][Ref 5] that was compiled and created by a Google Research team. We chose this dataset in part for the number of images, but mostly because the images are largely unmodified raw data and carry color transform metadata needed for our pipeline. Most of the images are around 12MP at a 4:3 ratio. We used the first image from each burst set which contained an average of 6 frames per burst.
+The dataset used is a subset of the “HDR+ Burst Photography Dataset” [[5]][Ref 5][[6]][Ref 6] that was compiled and created by a Google Research team. We chose this dataset in part for the number of images, but mostly because the images are largely unmodified raw data and carry color transform metadata needed for our pipeline. Most of the images are around 12MP at a 4:3 ratio. We used the first image from each burst set which contained an average of 6 frames per burst.
 
 The pixel-wise methods are the more computational efficient algorithms, as expected. **might need to change this to Dan's numbers** On a 2.9GHz 6th Gen Intel i7 MacBook Pro using SIMD instructions, the full pipeline from 4:3 ratio, 4K clipped raw binned to 1K reconstructed log space took roughly 4 ms per image. This translates to about 250 fps. Due to the nature of the Halide language, there is no way to perform branch statements without pre-computing possible outcomes. Therefore, both the LCh and HSV reconstructions are performed simultaneously and the correct representation is chosen based on user input. This unified pipeline runs on the whole dataset of 3640 DNGs ran at 19.4287 sec or roughly 187 fps. The same unified pipeline modified for a 2K output resolution averaged roughly 61 fps.
 
@@ -78,7 +82,7 @@ Bounding the usable recovery range of the CNN is more difficult as we don't know
 
 ## Downstream Application: Detectron2
 
-[[6]][Ref 6]
+[[7]][Ref 7]
 
 ## Conclusions
 
@@ -102,16 +106,18 @@ Images reconstructed in HLG space.
 
 ## References
 
-[1] Cyril, “Recovering Highlights with dcraw using LCH blending,” _Blown-highlight recovery with dcraw in LCH coordinates_, 14-Apr-2007. [Online]. Available: <http://people.zoy.org/~cyril/dcraw_lchblend/highlight_recovery_dcraw_lch_patch.html.>
+[1] “ESSENTIAL PARAMETER VALUES FOR THE EXTENDED IMAGE DYNAMIC RANGE TELEVISION (EIDRTV) SYSTEM FOR PROGRAMME PRODUCTION ARIB STANDARD ,” 03-Jul-2015. [Online]. Available: <https://www.arib.or.jp/english/html/overview/doc/2-STD-B67v1_0.pdf.>
 
-[2]  U. Fuchs and N. K. B. Jensen, “UFRaw,” _UFRaw_. 17-Jun-2015. <http://ufraw.sourceforge.net/Guide.html>
+[2] Cyril, “Recovering Highlights with dcraw using LCH blending,” _Blown-highlight recovery with dcraw in LCH coordinates_, 14-Apr-2007. [Online]. Available: <http://people.zoy.org/~cyril/dcraw_lchblend/highlight_recovery_dcraw_lch_patch.html.>
 
-[3] G. Eilertsen, J. Kronander, G. Denes, R. K. Mantiuk, and J. Unger, “HDR image reconstruction from a single exposure using deep CNNs,” _ACM Transactions on Graphics,_ vol. 36, no. 6, pp. 1–15, 2017.
+[3]  U. Fuchs and N. K. B. Jensen, “UFRaw,” _UFRaw_. 17-Jun-2015. <http://ufraw.sourceforge.net/Guide.html>
 
-[4][5] S. W. Hasinoff, D. Sharlet, R. Geiss, A. Adams, J. T. Barron, F. Kainz, J. Chen, and M. Levoy, “Burst photography for high dynamic range and low-light imaging on mobile cameras,” _ACM Transactions on Graphics,_ vol. 35, no. 6, pp. 1–12, Nov. 2016.
+[4] G. Eilertsen, J. Kronander, G. Denes, R. K. Mantiuk, and J. Unger, “HDR image reconstruction from a single exposure using deep CNNs,” _ACM Transactions on Graphics,_ vol. 36, no. 6, pp. 1–15, 2017.
+
+[5][6] S. W. Hasinoff, D. Sharlet, R. Geiss, A. Adams, J. T. Barron, F. Kainz, J. Chen, and M. Levoy, “Burst photography for high dynamic range and low-light imaging on mobile cameras,” _ACM Transactions on Graphics,_ vol. 35, no. 6, pp. 1–12, Nov. 2016.
 <https://dl.acm.org/doi/10.1145/2980179.2980254>
 
-[6] Facebook AI Research, “Detectron 2,” GitHub. [Online]. Available: <https://github.com/facebookresearch/detectron2.>
+[7] Facebook AI Research, “Detectron 2,” GitHub. [Online]. Available: <https://github.com/facebookresearch/detectron2.>
 
 ## Project Artifacts
 
@@ -124,14 +130,16 @@ Images reconstructed in HLG space.
 * [Midterm Report](midterm_report.md)
 
 [comment]: # "These are the reference style links to references."
-[Ref 1]: <http://people.zoy.org/~cyril/dcraw_lchblend/highlight_recovery_dcraw_lch_patch.html>
+[Ref 1]: <https://www.arib.or.jp/english/html/overview/doc/2-STD-B67v1_0.pdf>
 
-[Ref 2]: <http://ufraw.sourceforge.net/Guide.html>
+[Ref 2]: <http://people.zoy.org/~cyril/dcraw_lchblend/highlight_recovery_dcraw_lch_patch.html>
 
-[Ref 3]: https://dl.acm.org/doi/10.1145/3130800.3130816
+[Ref 3]: <http://ufraw.sourceforge.net/Guide.html>
 
-[Ref 4]: <http://hdrplusdata.org/dataset.html>
+[Ref 4]: https://dl.acm.org/doi/10.1145/3130800.3130816
 
-[Ref 5]: <https://static.googleusercontent.com/media/hdrplusdata.org/en//hdrplus.pdf>
+[Ref 5]: <http://hdrplusdata.org/dataset.html>
 
-[Ref 6]: <https://github.com/facebookresearch/detectron2>
+[Ref 6]: <https://static.googleusercontent.com/media/hdrplusdata.org/en//hdrplus.pdf>
+
+[Ref 7]: <https://github.com/facebookresearch/detectron2>
