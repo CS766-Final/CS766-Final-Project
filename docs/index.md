@@ -79,12 +79,14 @@ We wanted to see what effect, if any, highlight reconstruction had on downstream
 To calculate which image had better detection, we started by averaging the detection score for each class of objects if there was more than one object of that class detected per method per image. Then, per image, we subtracted the average of each class of the reconstruction images from the average of each class of the SDR HLG. We ignored classes that had no overlap between the reconstruction image and the SDR HLG image. This explains why each column in the tables below don't sum to our dataset size. We then averaged all the differences across each reconstruction method per image. Any value less than 0 now means the reconstructed image had higher scores and any value greater than 0 means the SDR HLG image had higher scores. Getting the counts of greater and less than 0 for each reconstruction method across the subset yields the following tables.
 
 +2 photographic stop gain
+
 | Tested Image   | HSV  | LCh  | CNN  |
 | -------------- | :--: | :--: | :--: |
 | Reconstruction | 237  | 234  | 179  |
 | SDR HLG        | 180  | 181  | 231  |
 
 +3 photographic stop gain
+
 | Tested Image   | HSV  | LCh  | CNN  |
 | -------------- | :--: | :--: | :--: |
 | Reconstruction | 250  | 222  | 173  |
