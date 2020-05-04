@@ -76,10 +76,10 @@ Bounding the usable recovery range of the CNN is more difficult as we don't know
 
 We wanted to see what effect, if any, highlight reconstruction had on downstream tasks. Object detection is prevalent across many fields and could possibly benefit from reconstructed inputs. Facebook AI Research's (FAIR's) Detectron2 is one state of the art object detection system. Out of the box, detectron2 is pre-trained on the COCO dataset using popular CNN designs such as Faster R-CNN and RetinaNet. On top of that, it also offers different detection options like Instance Segmentation and Panoptic Segmentation. [[7]][ref 7] We settled on using the pre-trained Mask R-CNN with a ResNet+FPN backbone trained with the 3x schedule to do instance segmentation. We chose this mainly because the authors note that the ResNet+FPN backbone provides the best speed/accuracy trade-off.
 
-|                      |HSV|LCh|CNN
-|                      |:---:|:---:|:---:|
-|reconstruction better |237|234|179|
-|SDR_log better        |180|181|231|
+| Tested Image   | HSV  | LCh  | CNN  |
+| -------------- | :--: | :--: | :--: |
+| Reconstruction | 237  | 234  | 179  |
+| SDR HLG        | 180  | 181  | 231  |
 
 
 ## Conclusions
