@@ -78,18 +78,9 @@ Bounding the usable recovery range of the CNN is more difficult as we don't know
 
 ## Downstream Application: Detectron2
 
+[[6]][Ref 6]
+
 ## Conclusions
-
-## References
-
-[1] Cyril, “Recovering Highlights with dcraw using LCH blending,” _Blown-highlight recovery with dcraw in LCH coordinates_, 14-Apr-2007. [Online]. Available: <http://people.zoy.org/~cyril/dcraw_lchblend/highlight_recovery_dcraw_lch_patch.html.>
-
-[2]  U. Fuchs and N. K. B. Jensen, “UFRaw,” _UFRaw_. 17-Jun-2015. <http://ufraw.sourceforge.net/Guide.html>
-
-[3] G. Eilertsen, J. Kronander, G. Denes, R. K. Mantiuk, and J. Unger, “HDR image reconstruction from a single exposure using deep CNNs,” _ACM Transactions on Graphics,_ vol. 36, no. 6, pp. 1–15, 2017.
-
-[4][5] S. W. Hasinoff, D. Sharlet, R. Geiss, A. Adams, J. T. Barron, F. Kainz, J. Chen, and M. Levoy, “Burst photography for high dynamic range and low-light imaging on mobile cameras,” _ACM Transactions on Graphics,_ vol. 35, no. 6, pp. 1–12, Nov. 2016.
-<https://dl.acm.org/doi/10.1145/2980179.2980254>
 
 ## Gallery
 
@@ -106,6 +97,19 @@ Images reconstructed in HLG space.
 | <img style="transform:rotate(90deg);margin-top:6.25%" src="./pictures/33TJ_20150705_191438_366/hsv_+3ev.png"> | <img style="transform:rotate(90deg);margin-top:6.25%" src="./pictures/33TJ_20150705_191438_366/lch_+3ev.png"> | <img style="transform:rotate(90deg);margin-top:6.25%" src="./pictures/33TJ_20150705_191438_366/cnn_+3ev.png"> |
 | <img src="./pictures/6G7M_20150421_121002_835/hsv_+3ev.png"> | <img src="./pictures/6G7M_20150421_121002_835/lch_+3ev.png"> | <img src="./pictures/6G7M_20150421_121002_835/cnn_+3ev.png"> |
 | <img style="transform:rotate(90deg);margin-top:6.25%;" src="./pictures/0132_20160917_184610_200/hsv_+3ev.png"> | <img style="transform:rotate(90deg);margin-top:6.25%;" src="./pictures/0132_20160917_184610_200/lch_+3ev.png"> | <img style="transform:rotate(90deg);margin-top:6.25%;" src="./pictures/0132_20160917_184610_200/cnn_+3ev.png"> |
+
+## References
+
+[1] Cyril, “Recovering Highlights with dcraw using LCH blending,” _Blown-highlight recovery with dcraw in LCH coordinates_, 14-Apr-2007. [Online]. Available: <http://people.zoy.org/~cyril/dcraw_lchblend/highlight_recovery_dcraw_lch_patch.html.>
+
+[2]  U. Fuchs and N. K. B. Jensen, “UFRaw,” _UFRaw_. 17-Jun-2015. <http://ufraw.sourceforge.net/Guide.html>
+
+[3] G. Eilertsen, J. Kronander, G. Denes, R. K. Mantiuk, and J. Unger, “HDR image reconstruction from a single exposure using deep CNNs,” _ACM Transactions on Graphics,_ vol. 36, no. 6, pp. 1–15, 2017.
+
+[4][5] S. W. Hasinoff, D. Sharlet, R. Geiss, A. Adams, J. T. Barron, F. Kainz, J. Chen, and M. Levoy, “Burst photography for high dynamic range and low-light imaging on mobile cameras,” _ACM Transactions on Graphics,_ vol. 35, no. 6, pp. 1–12, Nov. 2016.
+<https://dl.acm.org/doi/10.1145/2980179.2980254>
+
+[6] Facebook AI Research, “Detectron 2,” GitHub. [Online]. Available: <https://github.com/facebookresearch/detectron2.>
 
 ## Project Artifacts
 
@@ -127,3 +131,5 @@ Images reconstructed in HLG space.
 [Ref 4]: <http://hdrplusdata.org/dataset.html>
 
 [Ref 5]: <https://static.googleusercontent.com/media/hdrplusdata.org/en//hdrplus.pdf>
+
+[Ref 6]: <https://github.com/facebookresearch/detectron2>
