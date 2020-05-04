@@ -75,6 +75,3 @@ We do all of our calculations in the camera color space and then convert to srgb
 
     (5312, 2988): 1 --width 1328 --height 747 Done
 }
-
-
-5066_20160516_185718_426
