@@ -86,9 +86,11 @@ Bounding the usable recovery range of the CNN is more difficult as we don't know
 
 SDR images in generic 2.2 power curve. Right click and open image in a new tab to view at full resolution.
 
-| SDR  | <img style="transform:rotate(90deg);margin-top:6.25%;" src="./pictures/33TJ_20150705_191438_366/sdr_+3ev.png"> | <img src="./pictures/6G7M_20150421_121002_835/sdr_+3ev.png"> | <img style="transform:rotate(90deg);margin-top:6.25%;" src="./pictures/0132_20160917_184610_200/sdr_+3ev.png"> |
-| ---- | ------------------------------------------------------------ | ------------------------------------------------------------ | ------------------------------------------------------------ |
-| HLG  | <img style="transform:rotate(90deg);margin-top:6.25%" src="./pictures/33TJ_20150705_191438_366/sdr_log_+3ev.png"> | <img src="./pictures/6G7M_20150421_121002_835/sdr_log_+3ev.png"> | <img style="transform:rotate(90deg);margin-top:6.25%;" src="./pictures/0132_20160917_184610_200/sdr_log_+3ev.png"> |
+|                                                    SDR                                                         |                                                    HLG                                                         |
+| :------------------------------------------------------------------------------------------------------------: | :------------------------------------------------------------------------------------------------------------: |
+| <img style="transform:rotate(90deg);margin-top:6.25%;" src="./pictures/33TJ_20150705_191438_366/sdr_+3ev.png"> | <img style="transform:rotate(90deg);margin-top:6.25%" src="./pictures/33TJ_20150705_191438_366/sdr_log_+3ev.png"> |
+|                          <img src="./pictures/6G7M_20150421_121002_835/sdr_+3ev.png">                          |                          <img src="./pictures/6G7M_20150421_121002_835/sdr_log_+3ev.png">                          |
+| <img style="transform:rotate(90deg);margin-top:6.25%;" src="./pictures/0132_20160917_184610_200/sdr_+3ev.png"> | <img style="transform:rotate(90deg);margin-top:6.25%;" src="./pictures/0132_20160917_184610_200/sdr_log_+3ev.png"> |
 
 Images reconstructed in HLG space.
 
