@@ -43,25 +43,19 @@ if __name__ == "__main__":
     # with open(os.path.join(path,'all_results_cnn_sdrlog.json'), 'w+') as f:
     #         f.write(json.dumps(all_results))
 
-    # Combining the multiple result sets
+    # # Combining the multiple result sets
     # with open("../subset.json") as f:
     #     imgs = json.load(f)
 
-    # with open(os.path.join(path,"all_results_cnn_sdrlog.json")) as f:
-    #     cnn_sdrlog = json.load(f)
+    # with open(os.path.join(path,"all_results_all.json")) as f:
+    #     all_results = json.load(f)
 
-    # with open(os.path.join(path,"all_results_hsv_lch.json")) as f:
-    #     hsv_lch = json.load(f)
-
-    # all_results = {}
+    # with open(os.path.join(path,"all_results_sdrlog0.json")) as f:
+    #     sdrlog0 = json.load(f)
 
     # for img in imgs:
-    #     hsv_lch_dict = [dic for dic in hsv_lch if img in dic][0]
-    #     cnn_sdrlog_dict = [dic for dic in cnn_sdrlog if img in dic][0]
+    #     all_results[img].update(sdrlog0[img])
 
-    #     hsv_lch_dict[img].update(cnn_sdrlog_dict[img])
-
-    #     all_results.update(hsv_lch_dict)
 
     # # Write all results to one file
     # with open(os.path.join(path,'all_results_all.json'), 'w+') as f:
@@ -71,22 +65,59 @@ if __name__ == "__main__":
     with open(os.path.join(path,"all_results_all.json")) as f:
         all_results = json.load(f)
 
-    for img,results in all_results.items():
-        for gain in [2,3]:
+    stats = {
+        2: {
+            "cnn":[],
+            "hsv":[],
+            "lch":[]
+        },
+        3: {
+            "cnn":[],
+            "hsv":[],
+            "lch":[]
+        }
+    }
+
+    for gain in stats:
+        for img,results in all_results.items():
             cnn = results[f"cnn_+{gain}ev"]
             hsv = results[f"hsv_+{gain}ev"]
             lch = results[f"lch_+{gain}ev"]
             sdr_log = results[f"sdr_log_+{gain}ev"]
 
-            for found_object in sdr_log:
-                candidates = [candidate for candidate in cnn if found_object["pred_class"] == candidate["pred_class"]]
-                for candidate in candidates:
-                    match = True
-                    for cand_pos,obj_pos in zip(candidate["box"],found_object["box"]):
-                        match = (match and (obj_pos-2 <= cand_pos <= obj_pos+2))
+            classes = {}
+            for method in [cnn,hsv,lch,sdr_log]:
+                for detected_object in method:
+                    classes[detected_object["pred_class"]] = 1
+            
 
-                    if match:
-                        found_object["score"]-candidate["score"]
+            averages = {}
+            for pred_class in classes:
+                for method_name,method in zip(["cnn","hsv","lch",'sdr_log'],[cnn,hsv,lch,sdr_log]):
+                    found_objects = [candidate["score"] for candidate in method if candidate["pred_class"]==pred_class]
+                    if method_name in averages:
+                        averages[method_name].update({pred_class:(sum(found_objects)/len(found_objects) if len(found_objects)>0 else 0)})
+                    else:
+                        averages[method_name] = {pred_class:(sum(found_objects)/len(found_objects) if len(found_objects)>0 else 0)}
 
 
+            differences = {}
+            for pred_class in classes:
+                for method_name in ["cnn","hsv","lch"]:
+                    if averages[method_name][pred_class] > 0 and averages['sdr_log'][pred_class] > 0:
+                        if method_name in differences:
+                            differences[method_name].update({pred_class:(averages['sdr_log'][pred_class]-averages[method_name][pred_class])})
+                        else:
+                            differences[method_name] = {pred_class:(averages['sdr_log'][pred_class]-averages[method_name][pred_class])}
 
+
+            for method_name in differences:
+                stats[gain][method_name].append(sum(differences[method_name].values())/len(differences[method_name].values()))
+
+
+    for gain in stats:
+        for method_name in stats[gain]:
+            stats[gain][method_name] = list(map(lambda x: -1 if x < 0 else 1, stats[gain][method_name]))
+            stats[gain][method_name] = sum(stats[gain][method_name])/len(stats[gain][method_name])
+
+    print(stats)

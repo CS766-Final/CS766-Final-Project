@@ -97,8 +97,9 @@ if __name__ == "__main__":
     predictor = DefaultPredictor(cfg)
 
     all_results = {}
-    image_names = ['cnn_+2ev','cnn_+3ev','sdr_log_+2ev','sdr_log_+3ev']
+    #image_names = ['cnn_+2ev','cnn_+3ev','sdr_log_+2ev','sdr_log_+3ev']
     #image_names = ['hsv_+2ev','hsv_+3ev','lch_+2ev','lch_+3ev']
+    image_names = ['sdr_log_+0ev']
     # Path to top level dir containing dataset folders
     path = '/media/djkong7/dataset/'
 
@@ -110,7 +111,7 @@ if __name__ == "__main__":
     for folder in sub_dirs:
         #path_to_imgs = os.path.join(path,folder)
 
-        if 'results_cnn_sdrlog.json' in os.listdir(folder):
+        if 'results_sdrlog0.json' in os.listdir(folder):
             continue
 
         print(folder)
@@ -148,7 +149,7 @@ if __name__ == "__main__":
                 )
 
         # Write results of current folder to file in that folder
-        with open(os.path.join(folder,'results_cnn_sdrlog.json'), 'w+') as f:
+        with open(os.path.join(folder,'results_sdrlog0.json'), 'w+') as f:
             f.write(json.dumps(results))
 
 
@@ -158,6 +159,6 @@ if __name__ == "__main__":
 
 
     # Write all results to one file
-    with open(os.path.join(path,'all_results_cnn_sdrlog.json'), 'w+') as f:
+    with open(os.path.join(path,'all_results_sdrlog0.json'), 'w+') as f:
             f.write(json.dumps(all_results))
 

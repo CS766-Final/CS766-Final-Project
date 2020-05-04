@@ -57,10 +57,10 @@ We do all of our calculations in the camera color space and then convert to srgb
 
 # raw image sizes. png's are 1/4 this
 {
-    Read 210 images0.3928622174738084
+    Read 210 images 0.3928622174738084
     (4208, 3120): 1432, --width 1052 --height 780
 
-    Read 183 images0.373539079964481
+    Read 183 images 0.373539079964481
     (4032, 3024): 1055, --width 1008 --height 756
     (4080, 3028): 85, --width 1020 --height 757
     (4048, 3036): 660, --width 1012 --height 759
