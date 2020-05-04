@@ -52,7 +52,7 @@ With the pixel-wise methods, it's possible to define a mathematical upper-bound 
 
 ![\log_2{\max(wb)}](https://render.githubusercontent.com/render/math?math=%5Clog_2%7B%5Cmax(wb)%7D)
 
-LCh recovery depends less on the raw RGB intensities and their corresponding multipliers. This is because of the intermediate color transform from RGB to CIE XYZ before the LCh transform. The Y channel of XYZ represents the linear luminance, while X and Z contain all chromaticities at that luminance. Y is the dot product of the white balanced RGB values and the second row of the camera RGB to XYZ transform matrix. This transform matrix is derived from the color metadata stored in the files. From this, we can bound the reconstruction in XYZ space using a similar method above. The dot product tends to produce values less than just taking the max and leads to softer edges and transitions, creating smoother roll-off. This reduces the contrast in comparison to HSV reconstruction.
+LCh recovery depends less on the raw RGB intensities and their corresponding multipliers. This is because of the intermediate color transform from RGB to CIE XYZ before the LCh transform. The Y channel of XYZ represents the linear luminance, while X and Z contain all chromaticities at that luminance. Y is the dot product of the white balanced RGB values and the second row of the camera RGB to XYZ transform matrix. This transform matrix is derived from the color metadata stored in the files and changes on a per-camera basis. From this, we can bound the reconstruction in XYZ space using a similar method above. The dot product tends to produce values less than just taking the max and leads to softer edges and transitions, creating smoother roll-off. This reduces the contrast in comparison to HSV reconstruction.
 
 ![\log_2{Y}](https://render.githubusercontent.com/render/math?math=%5Clog_2%7BY%7D)
 
@@ -93,7 +93,7 @@ Bounding the usable recovery range of the CNN is more difficult as we don't know
 
 ## Gallery
 
-SDR images in generic 2.2 power curve.
+SDR images in generic 2.2 power curve. Right click and open image in a new tab to view at full resolution.
 
 | SDR  | <img style="transform:rotate(90deg);margin-top:6.25%;" src="./pictures/33TJ_20150705_191438_366/sdr_+3ev.png"> | <img src="./pictures/6G7M_20150421_121002_835/sdr_+3ev.png"> | <img style="transform:rotate(90deg);margin-top:6.25%;" src="./pictures/0132_20160917_184610_200/sdr_+3ev.png"> |
 | ---- | ------------------------------------------------------------ | ------------------------------------------------------------ | ------------------------------------------------------------ |
