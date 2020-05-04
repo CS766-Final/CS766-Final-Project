@@ -76,10 +76,19 @@ Bounding the usable recovery range of the CNN is more difficult as we don't know
 
 We wanted to see what effect, if any, highlight reconstruction had on downstream tasks. Object detection is prevalent across many fields and could possibly benefit from reconstructed inputs. Facebook AI Research's (FAIR's) Detectron2 is one state of the art object detection system. Out of the box, detectron2 is pre-trained on the COCO dataset using popular CNN designs such as Faster R-CNN and RetinaNet. On top of that, it also offers different detection options like Instance Segmentation and Panoptic Segmentation. [[7]][ref 7] We settled on using the pre-trained Mask R-CNN with a ResNet+FPN backbone trained with the 3x schedule to do instance segmentation. We chose this mainly because the authors note that the ResNet+FPN backbone provides the best speed/accuracy trade-off.
 
+To calculate which image had better detection, we started by averaging the detection score for each class of objects if there was more than one object of that class detected per method per image. Then, per image, we subtracted the average of each class of the reconstruction images from the average of each class of the SDR HLG. We ignored classes that had no overlap between the reconstruction image and the SDR HLG image. This explains why each column in the tables below don't sum to our dataset size. We then averaged all the differences across each reconstruction method per image. Any value less than 0 now means the reconstructed image had higher scores and any value greater than 0 means the SDR HLG image had higher scores. Getting the counts of greater and less than 0 for each reconstruction method across the subset yields the following tables.
+
++2 photographic stop gain
 | Tested Image   | HSV  | LCh  | CNN  |
 | -------------- | :--: | :--: | :--: |
 | Reconstruction | 237  | 234  | 179  |
 | SDR HLG        | 180  | 181  | 231  |
+
++3 photographic stop gain
+| Tested Image   | HSV  | LCh  | CNN  |
+| -------------- | :--: | :--: | :--: |
+| Reconstruction | 250  | 222  | 173  |
+| SDR HLG        | 154  | 184  | 227  |
 
 ## Conclusions
 
