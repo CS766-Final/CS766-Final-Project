@@ -3,6 +3,8 @@
 
 @import "{{ site.theme }}";
 
-td {
-    overflow: hidden;
+table {
+    td, th {
+        overflow: hidden;
+    }
 }
